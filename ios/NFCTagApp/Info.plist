@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	
+	<!-- NFC Entitlement -->
+	<key>com.apple.developer.nfc.readersession.formats</key>
+	<array>
+		<string>NDEF</string>
+		<string>TAG</string>
+	</array>
+	
+	<!-- NFC Reader Usage Description (Required by iOS 13+) -->
+	<key>NFCReaderUsageDescription</key>
+	<string>This app uses NFC to read household task tags. Bring your device near an NFC tag to trigger task notifications.</string>
+	
+	<!-- Supported NFC Tag Types -->
+	<key>com.apple.developer.nfc.readersession.iso14443</key>
+	<true/>
+	<key>com.apple.developer.nfc.readersession.iso15693</key>
+	<true/>
+	<key>com.apple.developer.nfc.readersession.felica</key>
+	<true/>
+	
+	<!-- App Configuration -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	
+	<!-- Supported Interface Orientations -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	
+	<!-- Required Device Capabilities -->
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>nfc</string>
+	</array>
+	
+	<!-- Allow Arbitrary Loads for Backend API Calls -->
+	<!-- Note: For production, configure proper SSL pinning and specific domains -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<!-- Allow localhost for development -->
+			<key>localhost</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSTemporaryExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+			</dict>
+			<!-- Configure production API domain -->
+			<key>api.example.com</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSTemporaryExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+			</dict>
+		</dict>
+	</dict>
+	
+	<!-- Push Notification Capability -->
+	<key>aps-environment</key>
+	<string>production</string>
+	
+	<!-- Background Modes for Remote Notifications -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>fetch</string>
+	</array>
+	
+	<!-- Privacy Descriptions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Location is not used by this app.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera is not used by this app.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone is not used by this app.</string>
+	
+	<!-- Local Notification Settings -->
+	<key>NSLocalizedNotificationRequests</key>
+	<array>
+		<dict>
+			<key>NSLocalizedNotificationRequestTitle</key>
+			<string>Task Notification</string>
+			<key>NSLocalizedNotificationRequestDescription</key>
+			<string>A household member completed or updated a task.</string>
+		</dict>
+	</array>
+	
+	<!-- Minimum OS Version -->
+	<key>MinimumOSVersion</key>
+	<string>13.0</string>
+	
+	<!-- Document Types (optional: for opening task links) -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Task Link</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLTypes</key>
+			<array>
+				<dict>
+					<key>CFBundleURLName</key>
+					<string>com.household.nfc-tag-app</string>
+					<key>CFBundleURLSchemes</key>
+					<array>
+						<string>nfc-tag</string>
+					</array>
+				</dict>
+			</array>
+		</dict>
+	</array>
+	
+	<!-- Version Info -->
+	<key>AppVersion</key>
+	<string>1.0.0</string>
+	<key>BuildNumber</key>
+	<string>1</string>
+</dict>
+</plist>

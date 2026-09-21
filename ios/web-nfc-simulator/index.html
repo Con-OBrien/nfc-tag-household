@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC Tag Web Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input.error {
+            border-color: #e74c3c;
+            background-color: #fadbd8;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .response-box {
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            display: none;
+        }
+
+        .response-box.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+            display: block;
+        }
+
+        .response-box.error {
+            background: #f8d7da;
+            border-color: #e74c3c;
+            color: #721c24;
+            display: block;
+        }
+
+        .response-box.info {
+            background: #d1ecf1;
+            border-color: #3498db;
+            color: #0c5460;
+            display: block;
+        }
+
+        .quick-fill {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .quick-fill button {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .quick-fill button:hover {
+            background: #d0d0d0;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+            margin-right: 8px;
+        }
+
+        .status-indicator.connected {
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #1565c0;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .code-example {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 NFC Tag Web Simulator</h1>
+        <p class="subtitle">Test NFC backend without physical tags or iOS device</p>
+
+        <div class="info-box">
+            <strong>💡 Info:</strong> This simulator sends mock NFC scan events to your backend. Use it for local development and testing.
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('simulator')">Simulator</button>
+            <button class="tab-btn" onclick="switchTab('webapi')">Web NFC API</button>
+        </div>
+
+        <!-- Simulator Tab -->
+        <div id="simulator" class="tab-content active">
+            <div class="section">
+                <div class="section-title">Server Configuration</div>
+                <div class="form-group">
+                    <label for="baseUrl">Backend URL</label>
+                    <input 
+                        type="text" 
+                        id="baseUrl" 
+                        placeholder="http://localhost:3000" 
+                        value="http://localhost:3000"
+                    >
+                    <div class="quick-fill">
+                        <button onclick="setBaseUrl('http://localhost:3000')">Local Dev</button>
+                        <button onclick="setBaseUrl('https://api.example.com')">Production</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">NFC Tag Data</div>
+                <div class="form-group">
+                    <label for="taskId">Task ID (UUID)</label>
+                    <input 
+                        type="text" 
+                        id="taskId" 
+                        placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000"
+                    >
+                    <div class="quick-fill">
+                        <button onclick="generateUUID('taskId')">Generate</button>
+                        <button onclick="fillExample('taskId', '550e8400-e29b-41d4-a716-446655440000')">Example</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="nonce">Nonce (Hex, 16 bytes)</label>
+                    <input 
+                        type="text" 
+                        id="nonce" 
+                        placeholder="e.g., a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+                    >
+                    <div class="quick-fill">
+                        <button onclick="generateNonce()">Generate</button>
+                        <button onclick="fillExample('nonce', 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6')">Example</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="signature">Signature (Hex, HMAC-SHA256)</label>
+                    <input 
+                        type="text" 
+                        id="signature" 
+                        placeholder="e.g., 64 hex characters"
+                    >
+                    <div class="quick-fill">
+                        <button onclick="generateSignature()">Generate Signature</button>
+                        <button onclick="fillExample('signature', '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')">Example</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="householdId">Household ID (UUID)</label>
+                    <input 
+                        type="text" 
+                        id="householdId" 
+                        placeholder="e.g., 660e9400-e29b-41d4-a716-446655440000"
+                    >
+                    <div class="quick-fill">
+                        <button onclick="generateUUID('householdId')">Generate</button>
+                        <button onclick="fillExample('householdId', '660e9400-e29b-41d4-a716-446655440000')">Example</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="userId">User ID (UUID)</label>
+                    <input 
+                        type="text" 
+                        id="userId" 
+                        placeholder="e.g., 770e9400-e29b-41d4-a716-446655440000"
+                    >
+                    <div class="quick-fill">
+                        <button onclick="generateUUID('userId')">Generate</button>
+                        <button onclick="fillExample('userId', '770e9400-e29b-41d4-a716-446655440000')">Example</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="simulateNFCScan()">📡 Simulate NFC Scan</button>
+                <button class="btn-secondary" onclick="clearForm()">Clear</button>
+            </div>
+
+            <div id="responseBox" class="response-box"></div>
+        </div>
+
+        <!-- Web NFC API Tab -->
+        <div id="webapi" class="tab-content">
+            <div class="info-box">
+                <strong>ℹ️ Info:</strong> The Web NFC API is supported in Chrome on Android and is a fallback option for testing in browsers that support it.
+            </div>
+
+            <div class="section">
+                <div class="section-title">Web NFC API Test</div>
+                <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                    Test reading actual NFC tags using the Web NFC API (requires Chrome on Android or compatible device).
+                </p>
+                
+                <button class="btn-primary" onclick="testWebNFC()" style="width: 100%;">
+                    🏷️ Start Reading Tag (Web NFC API)
+                </button>
+
+                <div class="code-example">// Simulated Web NFC API read
+const ndef = new NDEFReader();
+await ndef.scan();
+ndef.onreading = (event) => {
+  for (const record of event.message.records) {
+    console.log(record);
+  }
+};
+                </div>
+            </div>
+
+            <div id="webNFCStatus" class="response-box info" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_ENDPOINT = '/api/events/tag-scanned';
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // UUID Generation
+        function generateUUID(fieldId) {
+            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            document.getElementById(fieldId).value = uuid;
+        }
+
+        // Nonce Generation (16 bytes = 32 hex chars)
+        function generateNonce() {
+            let nonce = '';
+            for (let i = 0; i < 16; i++) {
+                nonce += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+            }
+            document.getElementById('nonce').value = nonce;
+        }
+
+        // Signature Generation (HMAC-SHA256 = 64 hex chars)
+        function generateSignature() {
+            let signature = '';
+            for (let i = 0; i < 32; i++) {
+                signature += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+            }
+            document.getElementById('signature').value = signature;
+        }
+
+        // Fill example data
+        function fillExample(fieldId, value) {
+            document.getElementById(fieldId).value = value;
+        }
+
+        // Set base URL
+        function setBaseUrl(url) {
+            document.getElementById('baseUrl').value = url;
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('taskId').value = '';
+            document.getElementById('nonce').value = '';
+            document.getElementById('signature').value = '';
+            document.getElementById('householdId').value = '';
+            document.getElementById('userId').value = '';
+            document.getElementById('responseBox').innerHTML = '';
+            document.getElementById('responseBox').className = 'response-box';
+        }
+
+        // Validate inputs
+        function validateInputs() {
+            const taskId = document.getElementById('taskId').value.trim();
+            const nonce = document.getElementById('nonce').value.trim();
+            const signature = document.getElementById('signature').value.trim();
+            const errors = [];
+
+            if (!taskId) errors.push('Task ID is required');
+            if (!isValidUUID(taskId) && taskId) errors.push('Task ID must be a valid UUID');
+            if (!nonce) errors.push('Nonce is required');
+            if (!isValidHex(nonce) && nonce) errors.push('Nonce must be valid hex (32 chars)');
+            if (!signature) errors.push('Signature is required');
+            if (!isValidHex(signature) && signature) errors.push('Signature must be valid hex (64 chars)');
+
+            return errors;
+        }
+
+        function isValidUUID(uuid) {
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            return uuidRegex.test(uuid);
+        }
+
+        function isValidHex(hex) {
+            return /^[0-9a-f]+$/i.test(hex) && hex.length % 2 === 0;
+        }
+
+        // Simulate NFC Scan
+        async function simulateNFCScan() {
+            const errors = validateInputs();
+            if (errors.length > 0) {
+                showResponse(`Validation Errors:\n\n${errors.join('\n')}`, 'error');
+                return;
+            }
+
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const taskId = document.getElementById('taskId').value.trim();
+            const nonce = document.getElementById('nonce').value.trim();
+            const signature = document.getElementById('signature').value.trim();
+            const householdId = document.getElementById('householdId').value.trim();
+            const userId = document.getElementById('userId').value.trim();
+
+            const payload = {
+                taskId,
+                nonce,
+                signature,
+                ...(householdId && { householdId }),
+                ...(userId && { userId })
+            };
+
+            showResponse(`Sending NFC tag scan event to:\n${baseUrl}${API_ENDPOINT}\n\nPayload:\n${JSON.stringify(payload, null, 2)}`, 'info');
+
+            try {
+                const response = await fetch(`${baseUrl}${API_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResponse(`✅ Success!\n\nStatus: ${response.status}\n\nResponse:\n${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResponse(`❌ Error!\n\nStatus: ${response.status}\n\nResponse:\n${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResponse(`❌ Network Error!\n\n${error.message}\n\nMake sure the backend is running at:\n${baseUrl}`, 'error');
+            }
+        }
+
+        // Show response
+        function showResponse(message, type) {
+            const responseBox = document.getElementById('responseBox');
+            responseBox.innerHTML = message;
+            responseBox.className = `response-box ${type}`;
+        }
+
+        // Test Web NFC API
+        async function testWebNFC() {
+            const statusBox = document.getElementById('webNFCStatus');
+            
+            if (!('NDEFReader' in window)) {
+                statusBox.innerHTML = '❌ Web NFC API not supported in this browser.\n\nSupported in:\n- Chrome on Android\n- Edge on Windows (with experimental flag enabled)\n\nOn unsupported platforms, use the Simulator tab instead.';
+                statusBox.style.display = 'block';
+                return;
+            }
+
+            try {
+                statusBox.innerHTML = '⏳ Waiting for NFC tag...\n\nBring an NFC tag close to your device.';
+                statusBox.style.display = 'block';
+
+                const ndef = new NDEFReader();
+                await ndef.scan();
+
+                ndef.onreading = (event) => {
+                    let output = '✅ Tag Read Successfully!\n\n';
+                    output += `Message:\n${JSON.stringify(event.message, null, 2)}\n\n`;
+                    output += 'Records:\n';
+                    
+                    for (const record of event.message.records) {
+                        output += JSON.stringify(record, null, 2) + '\n';
+                    }
+
+                    statusBox.innerHTML = output;
+                };
+
+                ndef.onreadingerror = () => {
+                    statusBox.innerHTML = '❌ Error reading tag.\n\nMake sure the tag is compatible and try again.';
+                };
+            } catch (error) {
+                statusBox.innerHTML = `❌ Error: ${error.message}\n\nWeb NFC API is not available or not permitted.`;
+            }
+        }
+
+        // Initialize with defaults
+        window.addEventListener('DOMContentLoaded', () => {
+            generateUUID('taskId');
+            generateNonce();
+            generateSignature();
+        });
+    </script>
+</body>
+</html>
