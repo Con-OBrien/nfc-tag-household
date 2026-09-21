@@ -3,6 +3,8 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './config/database';
 import { AppError } from './types';
+import taskRoutes from './routes/taskRoutes';
+import eventRoutes from './routes/eventRoutes';
 
 dotenv.config();
 
@@ -27,22 +29,17 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 /**
- * API Routes (will be added in subsequent tasks)
+ * API Routes
  */
+app.use('/api', taskRoutes);
+app.use('/api', eventRoutes);
+
 app.use('/api/auth', (req: Request, res: Response) => {
   res.json({ message: 'Auth routes not yet implemented' });
 });
 
-app.use('/api/tasks', (req: Request, res: Response) => {
-  res.json({ message: 'Task routes not yet implemented' });
-});
-
-app.use('/api/events', (req: Request, res: Response) => {
-  res.json({ message: 'Event routes not yet implemented' });
-});
-
-app.use('/api/households', (req: Request, res: Response) => {
-  res.json({ message: 'Household routes not yet implemented' });
+app.use('/api/users', (req: Request, res: Response) => {
+  res.json({ message: 'User routes not yet implemented' });
 });
 
 /**

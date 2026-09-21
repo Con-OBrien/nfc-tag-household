@@ -356,5 +356,75 @@ class UserRepository {
         }
         await this.repository.save(userEntity);
     }
+    /**
+     * Check if a user belongs to a household
+     * Used for household isolation checks
+     * @param userId - UUID of the user
+     * @param householdId - UUID of the household
+     * @returns true if user is a member of the household, false otherwise
+     */
+    async isUserInHousehold(userId, householdId) {
+        if (!userId || !householdId) {
+            return false;
+        }
+        const count = await this.repository.count({
+            where: {
+                userId,
+                householdId,
+            },
+        });
+        return count > 0;
+    }
+    /**
+     * Get all households for a user
+     * Returns list of household IDs user belongs to
+     * @param userId - UUID of the user
+     * @returns Array of household objects with householdId
+     * @throws ValidationError if userId is missing
+     */
+    async getUserHouseholds(userId) {
+        if (!userId) {
+            throw new types_1.ValidationError('userId is required');
+        }
+        const userEntities = await this.repository.find({
+            where: {
+                userId,
+            },
+            select: {
+                householdId: true,
+            },
+        });
+        return userEntities.map((entity) => ({
+            householdId: entity.householdId,
+        }));
+    }
+    /**
+     * Find user details by ID (without household requirement)
+     * Used to verify user exists when fetching cross-household events
+     * @param userId - UUID of the user
+     * @returns User object if found, null otherwise
+     * @throws ValidationError if userId is missing
+     */
+    async findUserDetails(userId) {
+        if (!userId) {
+            throw new types_1.ValidationError('userId is required');
+        }
+        const userEntity = await this.repository.findOne({
+            where: {
+                userId,
+            },
+            select: {
+                userId: true,
+                name: true,
+            },
+        });
+        if (!userEntity) {
+            return null;
+        }
+        return {
+            userId: userEntity.userId,
+            name: userEntity.name,
+        };
+    }
 }
 exports.UserRepository = UserRepository;
