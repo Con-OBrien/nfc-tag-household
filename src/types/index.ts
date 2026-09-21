@@ -118,6 +118,7 @@ export interface CreateTaskRequest {
 
 export interface CreateHouseholdRequest {
   name: string;
+  description?: string;
 }
 
 export interface UpdateUserPreferencesRequest {

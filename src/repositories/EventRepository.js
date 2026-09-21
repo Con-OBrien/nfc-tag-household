@@ -226,5 +226,29 @@ class EventRepository {
         }
         return map;
     }
+    /**
+     * Retrieve all events for a household (paginated)
+     * Used for household event history queries
+     * Returns events in reverse chronological order
+     * @param householdId - UUID of the household
+     * @param limit - Maximum number of events to return (default: 100, max: 1000)
+     * @returns Array of TaskEvents in reverse chronological order
+     * @throws ValidationError if householdId missing
+     */
+    async getHouseholdEvents(householdId, limit = 100) {
+        if (!householdId) {
+            throw new types_1.ValidationError('householdId is required');
+        }
+        if (limit < 1 || limit > 1000) {
+            throw new types_1.ValidationError('limit must be between 1 and 1000');
+        }
+        const eventEntities = await this.repository
+            .createQueryBuilder('event')
+            .where('event.householdId = :householdId', { householdId })
+            .orderBy('event.timestamp', 'DESC')
+            .limit(limit)
+            .getMany();
+        return eventEntities.map((entity) => entity.toTaskEvent());
+    }
 }
 exports.EventRepository = EventRepository;

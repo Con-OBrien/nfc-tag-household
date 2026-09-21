@@ -9,6 +9,8 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const database_1 = require("./config/database");
 const types_1 = require("./types");
+const taskRoutes_1 = __importDefault(require("./routes/taskRoutes"));
+const eventRoutes_1 = __importDefault(require("./routes/eventRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
@@ -28,19 +30,15 @@ app.get('/health', (_req, res) => {
     });
 });
 /**
- * API Routes (will be added in subsequent tasks)
+ * API Routes
  */
+app.use('/api', taskRoutes_1.default);
+app.use('/api', eventRoutes_1.default);
 app.use('/api/auth', (req, res) => {
     res.json({ message: 'Auth routes not yet implemented' });
 });
-app.use('/api/tasks', (req, res) => {
-    res.json({ message: 'Task routes not yet implemented' });
-});
-app.use('/api/events', (req, res) => {
-    res.json({ message: 'Event routes not yet implemented' });
-});
-app.use('/api/households', (req, res) => {
-    res.json({ message: 'Household routes not yet implemented' });
+app.use('/api/users', (req, res) => {
+    res.json({ message: 'User routes not yet implemented' });
 });
 /**
  * 404 Not Found handler
