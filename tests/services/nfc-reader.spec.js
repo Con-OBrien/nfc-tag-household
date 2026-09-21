@@ -95,38 +95,44 @@ describe('NFCReaderService', () => {
     describe('extractTagData', () => {
         it('should extract valid tag data from object', () => {
             const result = service.extractTagData(validTagData);
-            expect(result).not.toBeNull();
-            expect(result.tagId).toBe(validTagData.tagId);
-            expect(result.taskId).toBe(validTagData.taskId);
-            expect(result.timestamp).toBe(validTagData.timestamp);
+            expect(result.data).not.toBeNull();
+            expect(result.data.tagId).toBe(validTagData.tagId);
+            expect(result.data.taskId).toBe(validTagData.taskId);
+            expect(result.data.timestamp).toBe(validTagData.timestamp);
+            expect(result.error).toBeUndefined();
         });
         it('should extract valid tag data from JSON string', () => {
             const jsonString = JSON.stringify(validTagData);
             const result = service.extractTagData(jsonString);
-            expect(result).not.toBeNull();
-            expect(result.tagId).toBe(validTagData.tagId);
-            expect(result.taskId).toBe(validTagData.taskId);
+            expect(result.data).not.toBeNull();
+            expect(result.data.tagId).toBe(validTagData.tagId);
+            expect(result.data.taskId).toBe(validTagData.taskId);
+            expect(result.error).toBeUndefined();
         });
         it('should extract tag data with signature', () => {
             const signature = service.generateTagSignature(validTagData, householdSecret);
             const dataWithSignature = { ...validTagData, signature };
             const result = service.extractTagData(dataWithSignature);
-            expect(result).not.toBeNull();
-            expect(result.signature).toBe(signature);
+            expect(result.data).not.toBeNull();
+            expect(result.data.signature).toBe(signature);
+            expect(result.error).toBeUndefined();
         });
-        it('should return null for invalid JSON string', () => {
+        it('should return error for invalid JSON string', () => {
             const result = service.extractTagData('not valid json');
-            expect(result).toBeNull();
+            expect(result.data).toBeUndefined();
+            expect(result.error).toBeDefined();
+            expect(result.error.code).toBe('INVALID_JSON');
         });
-        it('should return null if required fields missing', () => {
+        it('should return error if required fields missing', () => {
             const incompleteData = { tagId: 'nfc_001' };
             const result = service.extractTagData(incompleteData);
-            expect(result).toBeNull();
+            expect(result.data).toBeUndefined();
+            expect(result.error).toBeDefined();
         });
-        it('should return null for non-object data', () => {
-            expect(service.extractTagData(null)).toBeNull();
-            expect(service.extractTagData(undefined)).toBeNull();
-            expect(service.extractTagData(123)).toBeNull();
+        it('should return error for non-object data', () => {
+            expect(service.extractTagData(null).error).toBeDefined();
+            expect(service.extractTagData(undefined).error).toBeDefined();
+            expect(service.extractTagData(123).error).toBeDefined();
         });
         it('should trim whitespace from string fields', () => {
             const dataWithWhitespace = {
@@ -135,18 +141,21 @@ describe('NFCReaderService', () => {
                 taskId: '  task_001  ',
             };
             const result = service.extractTagData(dataWithWhitespace);
-            expect(result.tagId).toBe('nfc_test_001');
-            expect(result.taskId).toBe('task_001');
+            expect(result.data.tagId).toBe('nfc_test_001');
+            expect(result.data.taskId).toBe('task_001');
+            expect(result.error).toBeUndefined();
         });
-        it('should return null for empty tag ID', () => {
+        it('should return error for empty tag ID', () => {
             const dataWithEmptyTagId = { ...validTagData, tagId: '' };
             const result = service.extractTagData(dataWithEmptyTagId);
-            expect(result).toBeNull();
+            expect(result.data).toBeUndefined();
+            expect(result.error).toBeDefined();
         });
-        it('should return null for empty task ID', () => {
+        it('should return error for empty task ID', () => {
             const dataWithEmptyTaskId = { ...validTagData, taskId: '' };
             const result = service.extractTagData(dataWithEmptyTaskId);
-            expect(result).toBeNull();
+            expect(result.data).toBeUndefined();
+            expect(result.error).toBeDefined();
         });
     });
     describe('isValidTagData', () => {
@@ -233,11 +242,12 @@ describe('NFCReaderService', () => {
             const signature = service.generateTagSignature(validTagData, householdSecret);
             // 2. Extract data with signature
             const tagDataWithSignature = { ...validTagData, signature };
-            const extracted = service.extractTagData(tagDataWithSignature);
+            const extractResult = service.extractTagData(tagDataWithSignature);
             // 3. Validate extracted data
-            expect(extracted).not.toBeNull();
-            const isValid = service.validateTagSignature(extracted, householdSecret);
-            expect(isValid).toBe(true);
+            expect(extractResult.data).not.toBeNull();
+            const validationResult = service.validateTagSignature(extractResult.data, householdSecret);
+            expect(validationResult.isValid).toBe(true);
+            expect(validationResult.error).toBeUndefined();
         });
         it('should reject tampered tag data', () => {
             // 1. Generate signature for original data
@@ -246,16 +256,18 @@ describe('NFCReaderService', () => {
             // 2. Tamper with data
             const tamperedData = { ...tagDataWithSignature, taskId: 'task_malicious' };
             // 3. Validation should fail
-            const isValid = service.validateTagSignature(tamperedData, householdSecret);
-            expect(isValid).toBe(false);
+            const validationResult = service.validateTagSignature(tamperedData, householdSecret);
+            expect(validationResult.isValid).toBe(false);
+            expect(validationResult.error).toBeDefined();
         });
         it('should reject data with mismatched household secret', () => {
             // 1. Generate signature with one secret
             const signature = service.generateTagSignature(validTagData, 'secret-1');
             const tagDataWithSignature = { ...validTagData, signature };
             // 2. Try to validate with different secret
-            const isValid = service.validateTagSignature(tagDataWithSignature, 'secret-2');
-            expect(isValid).toBe(false);
+            const validationResult = service.validateTagSignature(tagDataWithSignature, 'secret-2');
+            expect(validationResult.isValid).toBe(false);
+            expect(validationResult.error).toBeDefined();
         });
     });
 });
