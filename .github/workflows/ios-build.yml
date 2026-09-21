@@ -2,16 +2,10 @@
 
 on:
   push:
-    branches:
-      - main
-      - develop
     paths:
       - 'ios/**'
       - '.github/workflows/ios-build.yml'
   pull_request:
-    branches:
-      - main
-      - develop
     paths:
       - 'ios/**'
   workflow_dispatch:
@@ -125,6 +119,12 @@ jobs:
           path: ios/build
           retention-days: 7
 
+      - name: Report Build Status
+        if: always()
+        run: |
+          echo "Build Status: ${{ job.status }}"
+          echo "Workflow Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
   lint-and-analyze:
     runs-on: macos-latest
     
@@ -150,14 +150,3 @@ jobs:
             -scheme NFCTagApp \
             -configuration Debug
         continue-on-error: true
-
-  notify-on-success:
-    needs: build
-    runs-on: ubuntu-latest
-    if: success()
-    
-    steps:
-      - name: Log success
-        run: |
-          echo "✅ iOS build and test completed successfully"
-          echo "Build artifacts are available in the workflow run"
