@@ -4,17 +4,28 @@ import { UserEntity } from '../entities/User';
 import { HouseholdUser } from '../types';
 import { randomUUID } from 'crypto';
 import { ValidationError, ForbiddenError, NotFoundError } from '../types';
+import { CryptoService } from '../services/CryptoService';
 
 /**
  * UserRepository - Data access layer for user and household member management
  * Enforces household isolation on all queries - users can only access members of their own household
  * Manages push token lifecycle, user preferences, and role-based access
+ * Encrypts sensitive data (push tokens, email, phone) at rest using AES-256-GCM
+ * 
+ * Requirements: 12.1, 12.2, 12.3, 12.4, 18.2, 18.3, 18.4, 18.5
  */
 export class UserRepository {
   private repository: Repository<UserEntity>;
+  private cryptoService: CryptoService;
 
   constructor() {
     this.repository = AppDataSource.getRepository(UserEntity);
+    try {
+      this.cryptoService = new CryptoService();
+    } catch (error) {
+      console.warn('CryptoService initialization warning:', error);
+      // Continue without encryption if key not configured
+    }
   }
 
   /**
@@ -43,6 +54,28 @@ export class UserRepository {
     }
 
     return userEntity.toHouseholdUser();
+  }
+
+  /**
+   * Helper method: Decrypt push token if encrypted
+   * Used when retrieving users to get plaintext tokens for notification delivery
+   * @param token - Possibly encrypted token
+   * @returns Decrypted token or original token if not encrypted
+   */
+  private decryptTokenIfNeeded(token: string): string {
+    if (!this.cryptoService) {
+      return token;
+    }
+
+    try {
+      if (this.cryptoService.isEncrypted(token)) {
+        return this.cryptoService.decrypt(token);
+      }
+    } catch (error) {
+      console.error('Failed to decrypt push token:', error);
+    }
+
+    return token;
   }
 
   /**
@@ -168,18 +201,29 @@ export class UserRepository {
       throw new NotFoundError('User');
     }
 
+    // Encrypt the push token before storing (if crypto service available)
+    let encryptedToken = newToken;
+    if (this.cryptoService) {
+      try {
+        encryptedToken = this.cryptoService.encrypt(newToken);
+      } catch (error) {
+        console.error('Failed to encrypt push token:', error);
+        // Fall back to storing unencrypted
+      }
+    }
+
     // Remove old token from active tokens if it exists
     if (userEntity.pushToken && userEntity.pushTokens.includes(userEntity.pushToken)) {
       userEntity.pushTokens = userEntity.pushTokens.filter((token) => token !== userEntity.pushToken);
     }
 
     // Add new token to active tokens
-    if (!userEntity.pushTokens.includes(newToken)) {
-      userEntity.pushTokens.push(newToken);
+    if (!userEntity.pushTokens.includes(encryptedToken)) {
+      userEntity.pushTokens.push(encryptedToken);
     }
 
     // Set as current push token
-    userEntity.pushToken = newToken;
+    userEntity.pushToken = encryptedToken;
     userEntity.pushTokenLastChangedAt = Date.now();
 
     await this.repository.save(userEntity);

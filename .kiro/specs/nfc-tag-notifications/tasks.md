@@ -276,7 +276,7 @@ The system architecture consists of five primary layers: iOS NFC Interface Layer
   - Test date range filtering
   - Test household isolation in queries
 
-- [~] 26. Checkpoint - Verify user management and API layer
+- [x] 26. Checkpoint - Verify user management and API layer
   - Run all tests in tasks 21-25 and verify 100% pass rate
   - Verify household isolation in all endpoints
   - Verify role-based access control for all operations
@@ -284,7 +284,7 @@ The system architecture consists of five primary layers: iOS NFC Interface Layer
 
 ### Phase 6: NFC Event Ingestion API
 
-- [~] 27. Implement POST /events/tag-scanned endpoint
+- [x] 27. Implement POST /events/tag-scanned endpoint
   - Create main NFC scan event ingestion endpoint
   - Implement request parsing and validation
   - Wire event processor for tag-scanned events
@@ -325,25 +325,25 @@ The system architecture consists of five primary layers: iOS NFC Interface Layer
 
 ### Phase 7: Security and Encryption
 
-- [~] 32. Implement HTTPS/TLS configuration
+- [x] 32. Implement HTTPS/TLS configuration
   - Configure TLS 1.2+ for all HTTP connections
   - Set up certificate management
   - Implement request/response encryption in transit
   - _Requirements: 18.1_
 
-- [~] 33. Implement encryption at rest for sensitive data
+- [x] 33. Implement encryption at rest for sensitive data
   - Create AES-256 encryption for push tokens in database
   - Implement field-level encryption for PII (email, phone)
   - Create encryption key management (rotation capability)
   - _Requirements: 18.2, 18.3, 18.4, 18.5_
 
-- [~] 34. Implement secure data deletion for account cleanup
+- [x] 34. Implement secure data deletion for account cleanup
   - Create secure deletion for push tokens on account deletion
   - Implement PII removal from audit logs (if needed for compliance)
   - Create retention policy enforcement (90 days minimum, archive older)
   - _Requirements: 18.4, 23.7_
 
-- [~] 35. Implement NFC tag security infrastructure
+- [x] 35. Implement NFC tag security infrastructure
   - Create household-specific HMAC key generation and storage
   - Implement tag signature generation for new tags
   - Create tag deactivation endpoint

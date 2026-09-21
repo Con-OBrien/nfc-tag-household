@@ -4,10 +4,11 @@ import { authMiddleware } from '../middleware/auth';
 
 /**
  * Event Routes
- * Implements event history query endpoints for auditing and diagnostics
- * Requirements: 10.4, 10.5, 10.6, 10.7, 10.8
+ * Implements event ingestion and history query endpoints
+ * Requirements: 1.1, 2.1, 3.1, 5.1, 10.4, 10.5, 10.6, 10.7, 10.8
  *
  * Public routes (require authentication):
+ * - POST /api/events/tag-scanned - NFC tag scan event ingestion
  * - GET /api/households/:householdId/events - List household events
  * - GET /api/households/:householdId/events/:eventId - Get single event
  * - GET /api/users/me/events - Get user's personal event history
@@ -17,7 +18,27 @@ const router = Router();
 const eventController = new EventController();
 
 /**
- * Middleware: Require authentication for all event routes
+ * POST /api/events/tag-scanned
+ * NFC tag scan event ingestion endpoint
+ * NO authentication required - tag data includes userId and householdId
+ * 
+ * Request body:
+ * {
+ *   tagSignature: string (optional),
+ *   tagData: string (encoded tag data),
+ *   userId: string,
+ *   householdId: string,
+ *   timestamp: number
+ * }
+ *
+ * Requirements: 1.1, 2.1, 3.1, 5.1
+ */
+router.post('/events/tag-scanned', (req: Request, res: Response, next: NextFunction) => {
+  eventController.tagScanned(req, res, next);
+});
+
+/**
+ * Middleware: Require authentication for all remaining event routes
  */
 router.use(authMiddleware);
 
