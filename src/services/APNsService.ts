@@ -121,9 +121,9 @@ export class APNsService {
    * @returns true if token format is valid, false otherwise
    */
   private isValidAPNsToken(token: string): boolean {
-    // For testing: allow test_fail_ tokens for simulation
-    if (token.startsWith('test_fail_')) {
-      return token.length === 64 && /^test_fail_[0-9a-f]+$/i.test(token);
+    // For testing: allow test_fail tokens for simulation
+    if (token.startsWith('test_fail')) {
+      return token.length === 64 && /^test_fail[a-z0-9]+$/i.test(token);
     }
     
     // APNs tokens are exactly 64 hex characters
@@ -147,26 +147,33 @@ export class APNsService {
     await this.sleep(50);
 
     // For testing purposes, simulate occasional failures that will trigger retry logic
-    // Tokens starting with 'test_fail_' simulate failures
-    if (pushToken.startsWith('test_fail_')) {
-      const failureType = pushToken.split('_')[2];
+    // Tokens starting with 'test_fail' simulate failures
+    if (pushToken.startsWith('test_fail')) {
+      let failureType = '';
+      
+      // Determine failure type by checking token prefix pattern
+      if (pushToken.startsWith('test_failexpir')) failureType = 'expired';
+      else if (pushToken.startsWith('test_failauth')) failureType = 'auth';
+      else if (pushToken.startsWith('test_failrate')) failureType = 'rate';
+      else if (pushToken.startsWith('test_failinvalid')) failureType = 'invalid';
+      else if (pushToken.startsWith('test_failunavail')) failureType = 'unavailable';
       
       switch (failureType) {
         case 'invalid':
           // APNs returns 400 Bad Request for invalid tokens
-          throw new Error('Invalid APNs token: Bad device token');
+          throw new Error('Invalid APNs token format: Bad device token');
         case 'expired':
           // APNs returns 410 Gone for expired/unregistered tokens
-          throw new Error('Invalid APNs token: Device token has expired');
+          throw new Error('Token expired: Device token has expired');
         case 'rate':
           // APNs returns 429 Too Many Requests for rate limiting
-          throw new Error('Rate limit exceeded: Too many requests to APNs');
+          throw new Error('APNs rate limit exceeded: Too many requests to APNs');
         case 'unavailable':
           // APNs returns 503 Service Unavailable
           throw new Error('APNs service unavailable: Service temporarily down');
         case 'auth':
           // APNs returns 403 Forbidden for auth errors
-          throw new Error('Authentication failed: Invalid APNs certificate or credentials');
+          throw new Error('APNs authentication failed: Invalid APNs certificate or credentials');
         default:
           throw new Error('Unknown APNs error');
       }
