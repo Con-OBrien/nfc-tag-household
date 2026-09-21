@@ -1,0 +1,28 @@
+{
+    "coverageThreshold":  {
+                              "global":  {
+                                             "functions":  70,
+                                             "lines":  70,
+                                             "statements":  70,
+                                             "branches":  70
+                                         }
+                          },
+    "testEnvironment":  "node",
+    "moduleFileExtensions":  [
+                                 "ts",
+                                 "js",
+                                 "json"
+                             ],
+    "testMatch":  [
+                      "**/__tests__/**/*.ts",
+                      "**/?(*.)+(spec|test).ts"
+                  ],
+    "collectCoverageFrom":  [
+                                "src/**/*.ts",
+                                "!src/**/*.d.ts"
+                            ],
+    "preset":  "ts-jest",
+    "roots":  [
+                  ".\u003ctests\u003e"
+              ]
+}
