@@ -317,7 +317,7 @@ The system architecture consists of five primary layers: iOS NFC Interface Layer
   - Create endpoints for accessing system metrics
   - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6_
 
-- [~] 31. Checkpoint - Verify API endpoints work end-to-end
+- [x] 31. Checkpoint - Verify API endpoints work end-to-end
   - Run all tests in tasks 27-30 and verify 100% pass rate
   - Test complete workflow from NFC scan to notification delivery
   - Test error scenarios and recovery mechanisms
@@ -350,7 +350,7 @@ The system architecture consists of five primary layers: iOS NFC Interface Layer
   - Implement key rotation with re-signing of existing tags
   - _Requirements: 16.1, 16.4, 16.6_
 
-- [~] 36. Checkpoint - Verify security measures are in place
+- [x] 36. Checkpoint - Verify security measures are in place
   - Verify HTTPS enforced for all endpoints
   - Verify encryption at rest for sensitive fields
   - Verify tag signatures are properly validated
@@ -370,20 +370,20 @@ The system architecture consists of five primary layers: iOS NFC Interface Layer
   - Test error scenarios (invalid tags, hardware unavailable)
   - Test NFC session lifecycle
 
-- [~] 38. Implement optional web-based NFC fallback (for desktop testing)
+- [x] 38. Implement optional web-based NFC fallback (for desktop testing)
   - Create web NFC API wrapper (Safari 14+, Chrome Android)
   - Implement graceful fallback UI when Core NFC unavailable
   - Mock NFC scanner for local development and testing
   - _Requirements: 21.6 (optional web support)_
 
-- [~] 39. Implement iOS-optimized NFC abstraction layer
+- [x] 39. Implement iOS-optimized NFC abstraction layer
   - Create unified NFC interface for iOS (primary) with optional web fallback
   - Implement platform detection and routing (iOS Core NFC → fallback)
   - Add notification handling from iOS push service
   - Eliminate cross-platform complexity (Android-specific code removed)
   - _Requirements: 21.1, 21.2, 21.3, 21.4_
 
-- [~] 40. Set up GitHub Actions CI/CD pipeline for iOS builds
+- [x] 40. Set up GitHub Actions CI/CD pipeline for iOS builds
   - Create GitHub Actions workflow for automated iOS builds
   - Configure macOS runner for Xcode compilation
   - Set up automatic code signing with GitHub Secrets
@@ -391,7 +391,7 @@ The system architecture consists of five primary layers: iOS NFC Interface Layer
   - Configure artifact upload for build outputs
   - _Requirements: Automated CI/CD_
 
-- [~] 41. Implement iOS app configuration for free tier services
+- [x] 41. Implement iOS app configuration for free tier services
   - Configure Firebase Cloud Messaging (FCM) for free plan tier
   - Set up iOS app push certificate in Firebase Console
   - Implement push token registration on app launch

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>destination</key>
+	<string>export</string>
+	<key>distributionBundleIdentifier</key>
+	<string>com.household.nfc-tag-app</string>
+	<key>method</key>
+	<string>ad-hoc</string>
+	<key>provisioning</key>
+	<dict>
+		<key>com.household.nfc-tag-app</key>
+		<string>iOS Team Provisioning Profile</string>
+	</dict>
+	<key>signingCertificate</key>
+	<string>Apple Distribution</string>
+	<key>teamID</key>
+	<string></string>
+	<key>stripSwiftSymbols</key>
+	<true/>
+	<key>uploadBitcode</key>
+	<false/>
+	<key>uploadSymbols</key>
+	<true/>
+</dict>
+</plist>
